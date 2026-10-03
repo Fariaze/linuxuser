@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aesthetic Linux WebOS</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        body {
+            /* Красивый киберпанк/синтвейв фон */
+            background: linear-gradient(180deg, #0d0116 0%, #1a0b2e 60%, #3a1550 100%);
+            font-family: '-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+            color: #fff;
+        }
+
+        /* Эффект атмосферной светящейся дымки на заднем плане */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(255, 0, 128, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
+            transform: translate(-50%, -50%);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* --- ЧАСЫ ПО ЦЕНТРУ ЭКРАНА --- */
+        .center-clock {
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 1;
+        }
+
+        .center-clock .time {
+            font-size: 7rem;
+            font-weight: 200;
+            letter-spacing: -2px;
+            text-shadow: 0 0 20px rgba(0, 242, 254, 0.6), 0 0 40px rgba(0, 242, 254, 0.2);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .center-clock .date {
+            font-size: 1.2rem;
+            font-weight: 400;
+            color: rgba(255, 255, 255, 0.6);
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin-top: -5px;
+        }
+
+        /* --- МУЗЫКАЛЬНЫЙ ПРОИГРЫВАТЕЛЬ СПРАВА СВЕРХУ --- */
+        .music-player {
+            position: absolute;
+            top: 25px;
+            right: 25px;
+            width: 320px;
+            background: rgba(20, 10, 35, 0.65);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 10;
+            transition: border-color 0.3s;
+        }
+
+        .music-player:hover {
+            border-color: rgba(255, 0, 128, 0.4);
+        }
+
+        .album-art {
+            width: 65px;
+            height: 65px;
+            background: linear-gradient(45deg, #ff007f, #7928ca);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            box-shadow: 0 4px 15px rgba(255, 0, 127, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Спиннер крутящейся пластинки при воспроизведении */
+        .album-art.playing {
+            animation: spin 8s linear infinite;
+        }
+
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        .player-info {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .track-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            max-width: 160px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .track-artist {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.5);
+        }
+
+        .player-controls {
+            display: flex;
+            gap: 12px;
+            margin-top: 4px;
+            align-items: center;
+        }
+
+        .btn {
+            background: none;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            font-size: 1rem;
+            opacity: 0.7;
+            transition: opacity 0.2s, transform 0.1s;
+        }
+
+        .btn:hover { opacity: 1; color: #00f2fe; }
+        .btn:active { transform: scale(0.9); }
+        .btn-play { font-size: 1.3rem; color: #ff007f; }
+        .btn-play:hover { color: #ff007f; }
+
+        /* --- НИЖНЯЯ ПАНЕЛЬ (DOCK) --- */
+        .dock-container {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.07);
+            display: flex;
+            gap: 15px;
+            z-index: 10;
+        }
+
+        .dock-icon {
+            width: 45px;
+            height: 45px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+
+        .dock-icon:hover {
+            transform: translateY(-8px) scale(1.1);
+            background: rgba(255, 0, 128, 0.3);
+            box-shadow: 0 5px 15px rgba(255, 0, 128, 0.4);
+        }
+        
+        /* Верхний статус-бар Linux */
+        .status-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 28px;
+            background: rgba(10, 5, 20, 0.4);
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            color: rgba(255,255,255,0.7);
+            z-index: 10;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+        }
+        .status-bar .left-menu { display: flex; gap: 15px; font-weight: bold; color: #ff007f;}
+        .status-bar .right-menu { display: flex; gap: 12px; }
+    </style>
+</head>
+<body>
+
+    <!-- Верхняя панель Linux -->
+    <div class="status-bar">
+        <div class="left-menu"><span>⭘ Arch Linux</span></div>
+        <div class="right-menu">
+            <span>⚡ 98%</span>
+            <span>🌐 Connected</span>
+        </div>
+    </div>
+
+    <!-- Большие часы по центру экрана -->
+    <div class="center-clock">
+        <div class="time" id="clock-time">00:00</div>
+        <div class="date" id="clock-date">Понедельник, 1 Января</div>
+    </div>
+
+    <!-- Музыкальный плеер справа сверху -->
+    <div class="music-player">
+        <div class="album-art" id="album-disk">🌌</div>
+        <div class="player-info">
+            <div class="track-title" id="track-name">Synthwave Horizon</div>
+            <div class="track-artist" id="track-author">Lofi Coder</div>
+            <div class="player-controls">
+                <button class="btn" onclick="prevTrack()">⏮</button>
+                <button class="btn btn-play" id="play-btn" onclick="togglePlay()">▶</button>
+                <button class="btn" onclick="nextTrack()">⏭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Нижняя панель иконок (Dock) -->
+    <div class="dock-container">
+        <div class="dock-icon" title="Терминал" onclick="alert('Запуск Терминала...')">🐚</div>
+        <div class="dock-icon" title="Файловый менеджер" onclick="alert('Запуск Проводника...')">📁</div>
+        <div class="dock-icon" title="Браузер" onclick="alert('Запуск Браузера...')">🌐</div>
+        <div class="dock-icon" title="Настройки" onclick="alert('Параметры системы')">⚙️</div>
+    </div>
+
+    <!-- Исправленный аудио-элемент с рабочей демо-музыкой -->
+    <audio id="audio-element" src="https://soundhelix.com"></audio>
+
+    <script>
+        // --- ЛОГИКА ЧАСОВ ---
+        function updateClock() {
+            const now = new Date();
+            let hours = now.getHours().toString().padStart(2, '0');
+            let minutes = now.getMinutes().toString().padStart(2, '0');
+            
+            document.getElementById('clock-time').textContent = `${hours}:${minutes}`;
+
+            const options = { weekday: 'long', month: 'long', day: 'numeric' };
+            document.getElementById('clock-date').textContent = now.toLocaleDateString('ru-RU', options);
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // --- ЛОГИКА ПЛЕЕРА ---
+        const audio = document.getElementById('audio-element');
+        const playBtn = document.getElementById('play-btn');
+        const albumDisk = document.getElementById('album-disk');
+        const trackName = document.getElementById('track-name');
+        const trackAuthor = document.getElementById('track-author');
+
+        let isPlaying = false;
+        let currentTrackIdx = 0;
+
+        const playlist = [
+            { name: "Synthwave Horizon", author: "Lofi Coder", src: "https://soundhelix.com", art: "🌌" },
+            { name: "Neon Cyberpunk", author: "Retro Beats", src: "https://soundhelix.com", art: "🌆" },
+            { name: "Linux Ambient", author: "Kernel Crew", src: "https://soundhelix.com", art: "🐧" }
+        ];
+
+        function loadTrack(idx) {
+            const track = playlist[idx];
+            audio.src = track.src;
+            trackName.textContent = track.name;
+            trackAuthor.textContent = track.author;
+            albumDisk.textContent = track.art;
+        }
+
+        function togglePlay() {
+            if (isPlaying) {
+                audio.pause();
+                playBtn.textContent = "▶";
+// --- Функция активации кнопки Play/Pause (воспроизведение/пауза) ---
+function togglePlay() {
+    if (isPlaying) {
+        // Если музыка уже играла — ставим на паузу
+        audio.pause();
+        playBtn.textContent = "▶";               // Меняем иконку на «Играть»
+        albumDisk.classList.remove('playing');    // Останавливаем вращение диска
+    } else {
+        // Иначе (если стояла на паузе) — включаем музыку
+        // .catch() защищает сайт от ошибки, если браузер заблокирует звук до клика пользователя
+        audio.play().catch(e => console.log("Кликните на экран, чтобы разрешить аудио"));
+        playBtn.textContent = "⏸";               // Меняем иконку на «Пауза»
+        albumDisk.classList.add('playing');       // Диск начинает красиво крутиться
+    }
+    // Переключаем статус (меняем true на false или наоборот)
+    isPlaying = !isPlaying;
+}
+
+// --- Функция переключения на СЛЕДУЮЩИЙ трек ---
+function nextTrack() {
+    // Формула с процентом (%) листает треки вперед, а в конце списка сбрасывает на 0 (в начало)
+    currentTrackIdx = (currentTrackIdx + 1) % playlist.length;
+    loadTrack(currentTrackIdx); // Загружаем название и адрес новой песни
+    
+    // Если музыка играла до нажатия кнопки — новый трек запускается сразу
+    if (isPlaying) audio.play().catch(e => console.log(e));
+}
+
+// --- Функция переключения на ПРЕДЫДУЩИЙ трек ---
+function prevTrack() {
+    // Магия с "+ playlist.length" не дает счетчику уйти в минус при перемотке с первого трека
+    currentTrackIdx = (currentTrackIdx - 1 + playlist.length) % playlist.length;
+    loadTrack(currentTrackIdx); // Загружаем песню
+    
+    // Если музыка играла до нажатия кнопки — новый трек запускается сразу
+    if (isPlaying) audio.play().catch(e => console.log(e));
+}
+
+// --- Автопереключение ---
+// Как только песня полностью доиграет ('ended'), плеер сам переключит на следующую песню
+audio.addEventListener('ended', nextTrack);
